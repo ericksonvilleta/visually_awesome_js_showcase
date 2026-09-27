@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visually Awesome JS Showcase</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            900: '#0a0f1d',
+                            800: '#111827',
+                            700: '#1f293d',
+                            accent: '#3b82f6',
+                            glow: '#60a5fa',
+                            pink: '#ec4899',
+                            purple: '#8b5cf6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0f1d;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0f1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+        .glow-text {
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.6);
+        }
+        .glow-box {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+        .card-3d-wrapper {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-cyber-900 text-gray-100 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-cyber-900/80 border-b border-gray-800 px-4 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-pink-500 flex items-center justify-center glow-box">
+                    <i class="fa-solid fa-atom text-white text-lg animate-spin" style="animation-duration: 10s;"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wider bg-gradient-to-r from-blue-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">NEXUS VISUALS</h1>
+                    <p class="text-xs text-gray-400 mono-font">Interactive JS Creative Suite</p>
+                </div>
+            </div>
+
+            <!-- Mode Switcher Tabs -->
+            <nav class="flex items-center bg-cyber-800/90 p-1.5 rounded-2xl border border-gray-700/50 shadow-inner">
+                <button onclick="switchProject('particles')" id="btn-particles" class="project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 bg-blue-600 text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>Constellation</span>
+                </button>
+                <button onclick="switchProject('kaleidoscope')" id="btn-kaleidoscope" class="project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Kaleidoscope</span>
+                </button>
+                <button onclick="switchProject('cybercard')" id="btn-cybercard" class="project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-cube"></i>
+                    <span>Cyber Card</span>
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleControlPanel()" class="px-3 py-2 rounded-xl bg-cyber-800 border border-gray-700 hover:border-blue-500 text-sm text-gray-300 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-blue-400"></i>
+                    <span class="hidden md:inline">Controls</span>
+                </button>
+                <button onclick="openInfoModal()" class="w-9 h-9 rounded-xl bg-cyber-800 border border-gray-700 hover:border-blue-500 text-gray-300 flex items-center justify-center transition">
+                    <i class="fa-solid fa-info"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 relative flex overflow-hidden">
+        
+        <!-- Canvas/View Area -->
+        <div id="view-container" class="flex-1 relative flex items-center justify-center overflow-hidden">
+            
+            <!-- PROJECT 1: Particle Constellation -->
+            <div id="project-particles" class="project-view absolute inset-0 w-full h-full flex items-center justify-center">
+                <canvas id="canvas-particles" class="absolute inset-0 w-full h-full block cursor-crosshair"></canvas>
+                <div class="absolute bottom-6 left-6 pointer-events-none bg-cyber-800/80 backdrop-blur-md p-4 rounded-2xl border border-gray-700/50 max-w-xs shadow-xl hidden sm:block">
+                    <div class="text-xs uppercase tracking-widest text-blue-400 mono-font mb-1 font-bold">Module 01</div>
+                    <h3 class="font-bold text-sm text-gray-100">Quantum Constellation</h3>
+                    <p class="text-xs text-gray-400 mt-1">Move your cursor to attract nodes and generate quantum neural links.</p>
+                </div>
+            </div>
+
+            <!-- PROJECT 2: Generative Kaleidoscope -->
+            <div id="project-kaleidoscope" class="project-view absolute inset-0 w-full h-full hidden items-center justify-center">
+                <canvas id="canvas-kaleidoscope" class="absolute inset-0 w-full h-full block cursor-pointer"></canvas>
+                <div class="absolute bottom-6 left-6 pointer-events-none bg-cyber-800/80 backdrop-blur-md p-4 rounded-2xl border border-gray-700/50 max-w-xs shadow-xl hidden sm:block">
+                    <div class="text-xs uppercase tracking-widest text-pink-400 mono-font mb-1 font-bold">Module 02</div>
+                    <h3 class="font-bold text-sm text-gray-100">Harmonic Kaleidoscope</h3>
+                    <p class="text-xs text-gray-400 mt-1">Click or drag across the canvas to morph sacred geometric math harmonics.</p>
+                </div>
+            </div>
+
+            <!-- PROJECT 3: Immersive 3D Cyber Card -->
+            <div id="project-cybercard" class="project-view absolute inset-0 w-full h-full hidden items-center justify-center p-4">
+                <div class="card-3d-wrapper relative w-full max-w-md h-[480px] flex items-center justify-center select-none">
+                    <div id="cyber-card" class="relative w-full h-full rounded-3xl bg-gradient-to-br from-cyber-800/90 via-cyber-900/90 to-black border border-blue-500/40 p-8 flex flex-col justify-between shadow-2xl glow-box overflow-hidden transition-transform duration-100 ease-out cursor-grab active:cursor-grabbing">
+                        <!-- Holographic Glare Overlay -->
+                        <div id="card-glare" class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300 rounded-3xl z-20 mix-blend-overlay"></div>
+                        
+                        <!-- Background Cyber Grid & Glow Accents -->
+                        <div class="absolute -right-20 -top-20 w-60 h-60 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-pink-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f293d15_1px,transparent_1px),linear-gradient(to_bottom,#1f293d15_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+                        <!-- Card Header -->
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
+                                <span class="mono-font text-xs text-blue-400 tracking-widest uppercase">ID: 884-NEXUS</span>
+                            </div>
+                            <i class="fa-solid fa-microchip text-2xl text-blue-400"></i>
+                        </div>
+
+                        <!-- Card Body Content -->
+                        <div class="relative z-10 my-auto py-4">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/40">
+                                <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold tracking-wide text-white mb-2">CYBERNETIC CORE</h2>
+                            <p class="text-sm text-gray-400 leading-relaxed">Advanced biometric encryption passkey utilizing multi-vector quantum entanglement protocols.</p>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="relative z-10 pt-4 border-t border-gray-800 flex items-center justify-between text-xs mono-font text-gray-400">
+                            <div>
+                                <span class="block text-gray-600 uppercase text-[10px]">Operator</span>
+                                <span class="text-gray-200">DR. VANCE 01</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-gray-600 uppercase text-[10px]">Status</span>
+                                <span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> SECURE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Collapsible Control Panel Sidebar -->
+        <aside id="control-panel" class="absolute right-0 top-0 bottom-0 w-80 bg-cyber-800/95 backdrop-blur-xl border-l border-gray-800 p-6 flex flex-col z-40 transform translate-x-full transition-transform duration-300 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-700/60 mb-6">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-blue-400"></i>
+                    <h2 class="font-bold text-sm tracking-wide text-white">PARAMETER CONTROLS</h2>
+                </div>
+                <button onclick="toggleControlPanel()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Controls for Particles -->
+            <div id="controls-particles" class="control-group space-y-5 flex-1 overflow-y-auto pr-1">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Particle Density</span>
+                        <span id="val-density" class="mono-font text-blue-400">75</span>
+                    </div>
+                    <input type="range" id="range-density" min="20" max="150" value="75" class="w-full accent-blue-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Connection Distance</span>
+                        <span id="val-distance" class="mono-font text-blue-400">120</span>
+                    </div>
+                    <input type="range" id="range-distance" min="60" max="220" value="120" class="w-full accent-blue-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Speed Multiplier</span>
+                        <span id="val-speed" class="mono-font text-blue-400">1.0x</span>
+                    </div>
+                    <input type="range" id="range-speed" min="0.2" max="3.0" step="0.1" value="1.0" class="w-full accent-blue-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="pt-4 border-t border-gray-700/50">
+                    <label class="block text-xs font-medium text-gray-300 mb-2">Constellation Color Theme</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setParticleTheme('blue')" class="p-2 rounded-lg bg-blue-900/40 border border-blue-500 text-xs text-blue-300 font-medium">Cyber Blue</button>
+                        <button onclick="setParticleTheme('purple')" class="p-2 rounded-lg bg-purple-900/40 border border-purple-500 text-xs text-purple-300 font-medium">Neon Purple</button>
+                        <button onclick="setParticleTheme('matrix')" class="p-2 rounded-lg bg-emerald-900/40 border border-emerald-500 text-xs text-emerald-300 font-medium">Matrix Green</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls for Kaleidoscope -->
+            <div id="controls-kaleidoscope" class="control-group space-y-5 flex-1 overflow-y-auto pr-1 hidden">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Symmetry Segments</span>
+                        <span id="val-symmetry" class="mono-font text-pink-400">8</span>
+                    </div>
+                    <input type="range" id="range-symmetry" min="3" max="24" value="8" class="w-full accent-pink-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Rotation Speed</span>
+                        <span id="val-rotSpeed" class="mono-font text-pink-400">1.0</span>
+                    </div>
+                    <input type="range" id="range-rotSpeed" min="0.0" max="3.0" step="0.1" value="1.0" class="w-full accent-pink-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Color Frequency</span>
+                        <span id="val-freq" class="mono-font text-pink-400">0.02</span>
+                    </div>
+                    <input type="range" id="range-freq" min="0.005" max="0.08" step="0.005" value="0.02" class="w-full accent-pink-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="pt-4 border-t border-gray-700/50">
+                    <button onclick="resetKaleidoscope()" class="w-full py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-medium text-xs shadow-lg shadow-pink-600/30 transition">
+                        Clear & Reset Pattern
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls for Cyber Card -->
+            <div id="controls-cybercard" class="control-group space-y-5 flex-1 overflow-y-auto pr-1 hidden">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Tilt Intensity</span>
+                        <span id="val-tilt" class="mono-font text-blue-400">25°</span>
+                    </div>
+                    <input type="range" id="range-tilt" min="5" max="45" value="25" class="w-full accent-blue-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-300 font-medium">Glow Sensitivity</span>
+                        <span id="val-glow" class="mono-font text-blue-400">High</span>
+                    </div>
+                    <input type="range" id="range-glow" min="1" max="3" value="2" class="w-full accent-blue-500 bg-gray-700 rounded-lg h-2 cursor-pointer">
+                </div>
+
+                <div class="pt-4 border-t border-gray-700/50">
+                    <button onclick="randomizeCardData()" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-lg shadow-blue-600/30 transition">
+                        Regenerate Passkey ID
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-700/60 text-center">
+                <span class="text-[10px] text-gray-500 mono-font">HTML5 Canvas & 3D WebGL Engine</span>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-cyber-800 border border-gray-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-500 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">About Nexus Visuals</h3>
+                </div>
+                <button onclick="closeInfoModal()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+                <p>Welcome to your interactive JavaScript creative suite! This application showcases three distinct visual engines built with vanilla JavaScript, HTML5 Canvas, and modern CSS 3D transforms:</p>
+                <ul class="list-disc pl-5 space-y-1 text-xs text-gray-400">
+                    <li><strong class="text-blue-400">Quantum Constellation:</strong> Physics-based particle simulation with mouse attraction and dynamic distance triangulation.</li>
+                    <li><strong class="text-pink-400">Harmonic Kaleidoscope:</strong> Procedural mathematical art generator utilizing radial symmetry matrices.</li>
+                    <li><strong class="text-blue-400">Cybernetic Card:</strong> Responsive 3D tilt card with dynamic lighting, glowing specular highlights, and perspective depth.</li>
+                </ul>
+                <p class="text-xs text-gray-400 pt-2 border-t border-gray-700">Use the control panel sliders on the right to tweak live parameters and switch between modules seamlessly.</p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeInfoModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-500/30 transition">
+                    Explore Suite
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-cyber-800 border border-blue-500/60 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <span id="toast-message" class="text-xs font-medium">Parameter updated successfully</span>
+    </div>
+
+    <!-- JavaScript Application Engine -->
+    <script>
+        let currentProject = 'particles';
+        let isControlOpen = false;
+
+        function switchProject(projectId) {
+            currentProject = projectId;
+
+            // Update tab button styles
+            document.querySelectorAll('.project-tab').forEach(btn => {
+                btn.className = "project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 text-gray-400 hover:text-white";
+            });
+
+            const activeBtn = document.getElementById(`btn-${projectId}`);
+            if (projectId === 'particles') {
+                activeBtn.className = "project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 bg-blue-600 text-white shadow-lg shadow-blue-500/30";
+            } else if (projectId === 'kaleidoscope') {
+                activeBtn.className = "project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 bg-pink-600 text-white shadow-lg shadow-pink-600/30";
+            } else {
+                activeBtn.className = "project-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 flex items-center space-x-2 bg-indigo-600 text-white shadow-lg shadow-indigo-600/30";
+            }
+
+            // Show/Hide project view areas
+            document.querySelectorAll('.project-view').forEach(view => view.classList.add('hidden'));
+            document.getElementById(`project-${projectId}`).classList.remove('hidden');
+
+            // Show/Hide control groups
+            document.querySelectorAll('.control-group').forEach(group => group.classList.add('hidden'));
+            document.getElementById(`controls-${projectId}`).classList.remove('hidden');
+
+            // Trigger resize/redraw if canvas
+            if (projectId === 'particles') resizeParticlesCanvas();
+            if (projectId === 'kaleidoscope') resizeKaleidoscopeCanvas();
+        }
+
+        function toggleControlPanel() {
+            isControlOpen = !isControlOpen;
+            const panel = document.getElementById('control-panel');
+            if (isControlOpen) {
+                panel.classList.remove('translate-x-full');
+            } else {
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        function openInfoModal() {
+            document.getElementById('info-modal').classList.remove('hidden');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('info-modal').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        const pCanvas = document.getElementById('canvas-particles');
+        const pCtx = pCanvas.getContext('2d');
+        let pParticles = [];
+        let pConfig = {
+            density: 75,
+            maxDist: 120,
+            speed: 1.0,
+            theme: 'blue'
+        };
+
+        let mouse = { x: null, y: null, radius: 150 };
+
+        function resizeParticlesCanvas() {
+            pCanvas.width = pCanvas.parentElement.clientWidth;
+            pCanvas.height = pCanvas.parentElement.clientHeight;
+            initParticles();
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * pCanvas.width;
+                this.y = Math.random() * pCanvas.height;
+                this.vx = (Math.random() - 0.5) * 2 * pConfig.speed;
+                this.vy = (Math.random() - 0.5) * 2 * pConfig.speed;
+                this.radius = Math.random() * 2 + 1.5;
+            }
+            update() {
+                this.x += this.vx * pConfig.speed;
+                this.y += this.vy * pConfig.speed;
+
+                if (this.x < 0 || this.x > pCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > pCanvas.height) this.vy *= -1;
+
+                // Mouse interaction attraction
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        this.x += (dx / dist) * force * 1.5;
+                        this.y += (dy / dist) * force * 1.5;
+                    }
+                }
+            }
+            draw() {
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                pCtx.fillStyle = getParticleColor(0.8);
+                pCtx.fill();
+            }
+        }
+
+        function getParticleColor(alpha) {
+            if (pConfig.theme === 'purple') return `rgba(139, 92, 246, ${alpha})`;
+            if (pConfig.theme === 'matrix') return `rgba(16, 185, 129, ${alpha})`;
+            return `rgba(96, 165, 250, ${alpha})`; // Blue default
+        }
+
+        function initParticles() {
+            pParticles = [];
+            const count = Math.floor((pCanvas.width * pCanvas.height) / 14000) * (pConfig.density / 75);
+            for (let i = 0; i < Math.max(30, Math.min(200, count)); i++) {
+                pParticles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            if (currentProject === 'particles') {
+                pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+                // Update and draw particles
+                for (let i = 0; i < pParticles.length; i++) {
+                    pParticles[i].update();
+                    pParticles[i].draw();
+
+                    // Connect lines
+                    for (let j = i + 1; j < pParticles.length; j++) {
+                        let dx = pParticles[i].x - pParticles[j].x;
+                        let dy = pParticles[i].y - pParticles[j].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < pConfig.maxDist) {
+                            let alpha = (1 - (dist / pConfig.maxDist)) * 0.4;
+                            pCtx.beginPath();
+                            pCtx.moveTo(pParticles[i].x, pParticles[i].y);
+                            pCtx.lineTo(pParticles[j].x, pParticles[j].y);
+                            pCtx.strokeStyle = getParticleColor(alpha);
+                            pCtx.lineWidth = 1;
+                            pCtx.stroke();
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        pCanvas.addEventListener('mousemove', (e) => {
+            const rect = pCanvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        pCanvas.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        function setParticleTheme(theme) {
+            pConfig.theme = theme;
+            showToast(`Theme switched to ${theme.toUpperCase()}`);
+        }
+
+        const kCanvas = document.getElementById('canvas-kaleidoscope');
+        const kCtx = kCanvas.getContext('2d');
+        let kConfig = {
+            symmetry: 8,
+            rotSpeed: 1.0,
+            freq: 0.02
+        };
+        let kAngle = 0;
+        let kDrawing = false;
+        let kPoints = [];
+
+        function resizeKaleidoscopeCanvas() {
+            kCanvas.width = kCanvas.parentElement.clientWidth;
+            kCanvas.height = kCanvas.parentElement.clientHeight;
+            kCtx.fillStyle = '#0a0f1d';
+            kCtx.fillRect(0, 0, kCanvas.width, kCanvas.height);
+        }
+
+        function resetKaleidoscope() {
+            kCtx.fillStyle = '#0a0f1d';
+            kCtx.fillRect(0, 0, kCanvas.width, kCanvas.height);
+            kPoints = [];
+            showToast("Kaleidoscope canvas cleared");
+        }
+
+        function animateKaleidoscope() {
+            if (currentProject === 'kaleidoscope') {
+                kCtx.fillStyle = 'rgba(10, 15, 29, 0.08)';
+                kCtx.fillRect(0, 0, kCanvas.width, kCanvas.height);
+
+                kAngle += kConfig.rotSpeed * 0.005;
+                const cx = kCanvas.width / 2;
+                const cy = kCanvas.height / 2;
+                const symmetry = kConfig.symmetry;
+                const angleStep = (Math.PI * 2) / symmetry;
+
+                kCtx.save();
+                kCtx.translate(cx, cy);
+                kCtx.rotate(kAngle);
+
+                // Draw automatic ambient hypnotic mandala lines
+                let time = Date.now() * 0.001 * kConfig.rotSpeed;
+                for (let i = 0; i < symmetry; i++) {
+                    kCtx.save();
+                    kCtx.rotate(i * angleStep);
+                    
+                    kCtx.beginPath();
+                    let radius = 120 + Math.sin(time * 2 + i) * 60;
+                    let x1 = Math.cos(time) * radius;
+                    let y1 = Math.sin(time * 1.5) * radius;
+                    let x2 = Math.cos(time * 0.8) * (radius * 1.5);
+                    let y2 = Math.sin(time * 0.5) * (radius * 1.5);
+                    
+                    kCtx.moveTo(x1, y1);
+                    kCtx.lineTo(x2, y2);
+                    
+                    let hue = (time * 50 + i * (360 / symmetry)) % 360;
+                    kCtx.strokeStyle = `hsla(${hue}, 80%, 60%, 0.4)`;
+                    kCtx.lineWidth = 2;
+                    kCtx.stroke();
+
+                    kCtx.restore();
+                }
+
+                // Draw interactive user points if dragging
+                if (kDrawing && kPoints.length > 0) {
+                    let pt = kPoints[kPoints.length - 1];
+                    let relX = pt.x - cx;
+                    let relY = pt.y - cy;
+
+                    for (let i = 0; i < symmetry; i++) {
+                        kCtx.save();
+                        kCtx.rotate(i * angleStep);
+                        kCtx.beginPath();
+                        kCtx.arc(relX, relY, 4, 0, Math.PI * 2);
+                        kCtx.fillStyle = `hsl(${(Date.now() * 0.1 + i * 20) % 360}, 90%, 65%)`;
+                        kCtx.shadowColor = kCtx.fillStyle;
+                        kCtx.shadowBlur = 10;
+                        kCtx.fill();
+                        kCtx.restore();
+                    }
+                }
+
+                kCtx.restore();
+            }
+            requestAnimationFrame(animateKaleidoscope);
+        }
+
+        kCanvas.addEventListener('mousedown', (e) => {
+            kDrawing = true;
+            addKaleidoscopePoint(e);
+        });
+        kCanvas.addEventListener('mousemove', (e) => {
+            if (kDrawing) addKaleidoscopePoint(e);
+        });
+        window.addEventListener('mouseup', () => { kDrawing = false; });
+
+        kCanvas.addEventListener('touchstart', (e) => {
+            kDrawing = true;
+            addKaleidoscopePoint(e.touches[0]);
+        });
+        kCanvas.addEventListener('touchmove', (e) => {
+            if (kDrawing) addKaleidoscopePoint(e.touches[0]);
+        });
+        window.addEventListener('touchend', () => { kDrawing = false; });
+
+        function addKaleidoscopePoint(e) {
+            const rect = kCanvas.getBoundingClientRect();
+            kPoints.push({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            });
+            if (kPoints.length > 50) kPoints.shift();
+        }
+
+        const cyberCard = document.getElementById('cyber-card');
+        const cardWrapper = document.querySelector('.card-3d-wrapper');
+        const cardGlare = document.getElementById('card-glare');
+        let cardConfig = { tilt: 25, glow: 2 };
+
+        if (cardWrapper && cyberCard) {
+            cardWrapper.addEventListener('mousemove', (e) => {
+                if (currentProject !== 'cybercard') return;
+                const rect = cardWrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -cardConfig.tilt;
+                const rotateY = ((x - centerX) / centerX) * cardConfig.tilt;
+
+                cyberCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+
+                // Glare effect calculation
+                const glareX = (x / rect.width) * 100;
+                const glareY = (y / rect.height) * 100;
+                cardGlare.style.opacity = '0.6';
+                cardGlare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(96,165,250,0.4) 0%, rgba(236,72,153,0.1) 50%, transparent 80%)`;
+            });
+
+            cardWrapper.addEventListener('mouseleave', () => {
+                cyberCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                cardGlare.style.opacity = '0';
+                cyberCard.style.transition = 'transform 0.5s ease-out';
+            });
+
+            cardWrapper.addEventListener('mouseenter', () => {
+                cyberCard.style.transition = 'none';
+            });
+        }
+
+        function randomizeCardData() {
+            const randomID = Math.floor(100 + Math.random() * 900) + '-NEXUS-' + Math.floor(10 + Math.random() * 90);
+            document.querySelector('#cyber-card .mono-font').textContent = `ID: ${randomID}`;
+            showToast("Passkey ID regenerated successfully");
+        }
+
+        // Control listeners for Particles
+        document.getElementById('range-density').addEventListener('input', (e) => {
+            pConfig.density = parseInt(e.target.value);
+            document.getElementById('val-density').textContent = pConfig.density;
+            initParticles();
+        });
+        document.getElementById('range-distance').addEventListener('input', (e) => {
+            pConfig.maxDist = parseInt(e.target.value);
+            document.getElementById('val-distance').textContent = pConfig.maxDist;
+        });
+        document.getElementById('range-speed').addEventListener('input', (e) => {
+            pConfig.speed = parseFloat(e.target.value);
+            document.getElementById('val-speed').textContent = pConfig.speed.toFixed(1) + 'x';
+        });
+
+        // Control listeners for Kaleidoscope
+        document.getElementById('range-symmetry').addEventListener('input', (e) => {
+            kConfig.symmetry = parseInt(e.target.value);
+            document.getElementById('val-symmetry').textContent = kConfig.symmetry;
+        });
+        document.getElementById('range-rotSpeed').addEventListener('input', (e) => {
+            kConfig.rotSpeed = parseFloat(e.target.value);
+            document.getElementById('val-rotSpeed').textContent = kConfig.rotSpeed.toFixed(1);
+        });
+        document.getElementById('range-freq').addEventListener('input', (e) => {
+            kConfig.freq = parseFloat(e.target.value);
+            document.getElementById('val-freq').textContent = kConfig.freq;
+        });
+
+        // Control listeners for Cyber Card
+        document.getElementById('range-tilt').addEventListener('input', (e) => {
+            cardConfig.tilt = parseInt(e.target.value);
+            document.getElementById('val-tilt').textContent = cardConfig.tilt + '°';
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            resizeParticlesCanvas();
+            resizeKaleidoscopeCanvas();
+        });
+
+        // Initialize application on load
+        window.onload = function() {
+            resizeParticlesCanvas();
+            resizeKaleidoscopeCanvas();
+            animateParticles();
+            animateKaleidoscope();
+        };
+    </script>
+</body>
+</html>
